@@ -48,7 +48,7 @@ A cross-platform desktop GUI application for managing GitHub repositories — cr
 ### Automated Setup
 
 ```bash
-git clone https://github.com/Riflxz/Gitup.git
+git clone <repository-url>
 cd github-uploader
 bash setup.sh
 ```
