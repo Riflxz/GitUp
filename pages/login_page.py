@@ -165,7 +165,7 @@ def login_page(page: ft.Page, state: AppState, navigate: callable) -> ft.Contain
         alignment=ft.alignment.center,
         content=ft.Column(
             [
-                ft.Icon(ft.icons.HUB_OUTLINED, size=52, color=PRIMARY),
+                ft.Image(src="logo.png", width=80, height=80, fit=ft.ImageFit.CONTAIN),
                 ft.Text(
                     "GitHub Uploader",
                     size=26, color=TEXT_MAIN,

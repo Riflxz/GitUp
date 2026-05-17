@@ -1,5 +1,6 @@
 # main.py
 
+import base64
 import flet as ft
 from config import (
     APP_NAME, WIN_WIDTH, WIN_HEIGHT, BG_MAIN,
@@ -20,6 +21,11 @@ def main(page: ft.Page) -> None:
     page.padding        = 0
     page.spacing        = 0
     page.fonts          = {}
+
+    with open("icon.png", "rb") as f:
+        b64 = base64.b64encode(f.read()).decode()
+    page.window.icon = f"data:image/png;base64,{b64}"
+    page.update()
 
     state = AppState()
 

@@ -1,5 +1,9 @@
 # GitHub Uploader
 
+<div align="center">
+  <img src="logo.png" alt="GitHub Uploader" width="128"/>
+</div>
+
 A cross-platform desktop GUI application for managing GitHub repositories — create, upload, clone, branch, and configure repositories with an intuitive interface.
 
 <div align="center">
@@ -22,6 +26,7 @@ A cross-platform desktop GUI application for managing GitHub repositories — cr
 | **Clone** | Clone repositories locally with branch selection |
 | **Branch Management** | View, create, and delete branches |
 | **Repository Settings** | Update visibility, description, features, and merge settings |
+| **Info & Management** | View repo details, manage tags, releases, and topics |
 
 ## Screenshots
 
@@ -126,9 +131,10 @@ github-uploader/
 │   ├── dashboard_page.py    # Repository dashboard
 │   ├── create_repo_page.py  # Repository creation
 │   ├── upload_page.py       # File upload
-│   ├── clone_page.py        # Repository cloning
-│   ├── branch_page.py       # Branch management
-│   └── edit_repo_page.py    # Repository settings
+│   ├── clone_page.py       # Repository cloning
+│   ├── branch_page.py      # Branch management
+│   ├── edit_repo_page.py   # Repository settings
+│   └── info_page.py        # Repository info & release/tag management
 └── components/
     ├── dialogs.py           # UI dialogs (error, success, confirm, progress)
     ├── file_item.py         # File item component
@@ -165,5 +171,3 @@ The application uses a consistent **GitHub Dark** theme throughout all pages.
 ## License
 
 This project is open source and distributed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
-
-This software contains no malicious code, backdoors, telemetry, or data collection. It operates entirely locally and communicates only with the official GitHub API using user-provided authentication tokens.

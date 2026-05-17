@@ -3,7 +3,7 @@
 import flet as ft
 from config import (
     BG_SURFACE, BORDER, PRIMARY, DANGER,
-    TEXT_MAIN, TEXT_MUTED, APP_NAME, APP_VERSION,
+    TEXT_MAIN, TEXT_MUTED, ACCENT, APP_NAME, APP_VERSION,
     PAGE_DASHBOARD, PAGE_CREATE
 )
 
@@ -119,12 +119,11 @@ class Sidebar(ft.UserControl):
                         color=TEXT_MUTED,
                         text_align=ft.TextAlign.CENTER,
                     ),
-                    ft.Text(
-                        "@ZeroXD909",
-                        size=9,
-                        color=TEXT_MUTED,
-                        text_align=ft.TextAlign.CENTER,
-                        opacity=0.6,
+                    ft.TextButton(
+                        content=ft.Text("@ZeroXD909", size=9, color=ACCENT,
+                                        text_align=ft.TextAlign.CENTER),
+                        url="https://t.me/zeroxd909",
+                        style=ft.ButtonStyle(padding=ft.padding.all(0)),
                     ),
                 ],
                 expand=True,
