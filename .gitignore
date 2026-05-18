@@ -6,3 +6,5 @@ __pycache__/
 *.token
 .env
 fixed.md
+gif.gif
+README.md
