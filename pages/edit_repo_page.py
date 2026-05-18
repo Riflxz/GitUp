@@ -154,7 +154,11 @@ def edit_repo_page(page: ft.Page, state: AppState,
 
             loading.visible = False
             form_container.visible = True
+            nonlocal default_branch
+            default_branch = detail["default_branch"]
+            file_manager_section.visible = True
             page.update()
+            _navigate_to("")
         except Exception as e:
             loading.visible = False
             page.update()
@@ -206,6 +210,432 @@ def edit_repo_page(page: ft.Page, state: AppState,
             dialogs.show_error(page, "Gagal Menyimpan", str(e))
 
     save_btn.on_click = do_save
+
+    # ── File Manager ───────────────────────────────────────────
+    current_path = ""
+    default_branch = ""
+    file_list = ft.Column(spacing=4, scroll=ft.ScrollMode.AUTO)
+    file_manager_section = ft.Container(visible=False)
+
+    async def _load_contents(path: str):
+        try:
+            items = await asyncio.to_thread(
+                github_api.get_contents, state.token, repo["full_name"], path)
+            file_list.controls.clear()
+
+            if path:
+                file_list.controls.append(
+                    ft.Container(
+                        content=ft.Row(
+                            [ft.Icon(ft.icons.ARROW_UPWARD, size=16, color=ACCENT),
+                             ft.Text(".. (kembali)", size=13, color=ACCENT)],
+                            spacing=6,
+                        ),
+                        padding=ft.padding.symmetric(horizontal=10, vertical=8),
+                        border_radius=6,
+                        ink=True,
+                        on_click=lambda _: _navigate_to(
+                            "/".join(current_path.split("/")[:-1])),
+                    )
+                )
+
+            for item in sorted(items, key=lambda x: (x["type"] != "dir", x["name"])):
+                is_dir = item["type"] == "dir"
+                file_list.controls.append(
+                    ft.Container(
+                        content=ft.Row(
+                            [
+                                ft.Icon(
+                                    ft.icons.FOLDER if is_dir else ft.icons.DESCRIPTION,
+                                    size=18,
+                                    color=ACCENT if is_dir else TEXT_MUTED,
+                                ),
+                                ft.Text(item["name"], size=13, color=TEXT_MAIN,
+                                        expand=True),
+                                ft.Text(
+                                    _format_size(item["size"]), size=11,
+                                    color=TEXT_MUTED,
+                                    visible=not is_dir,
+                                ),
+                                ft.IconButton(
+                                    icon=ft.icons.EDIT,
+                                    icon_size=16,
+                                    icon_color=ACCENT,
+                                    tooltip="Edit file",
+                                    visible=not is_dir,
+                                    on_click=lambda _, p=item["path"]:
+                                        _open_edit_dialog(p),
+                                ),
+                                ft.IconButton(
+                                    icon=ft.icons.DELETE_OUTLINE,
+                                    icon_size=16,
+                                    icon_color=DANGER,
+                                    tooltip="Hapus",
+                                    on_click=lambda _, p=item["path"], d=is_dir:
+                                        _confirm_delete(p, d),
+                                ),
+                            ],
+                            spacing=6,
+                            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                        ),
+                        padding=ft.padding.symmetric(horizontal=10, vertical=6),
+                        border_radius=6,
+                        ink=True,
+                        on_click=lambda _, p=item["path"], d=is_dir:
+                            _navigate_to(p) if d else _open_edit_dialog(p),
+                    )
+                )
+            page.update()
+        except Exception as e:
+            dialogs.show_error(page, "Gagal Memuat File", str(e))
+
+    def _navigate_to(path: str):
+        nonlocal current_path
+        current_path = path
+        path_text.value = f"/{path}" if path else "/"
+        page.run_task(_load_contents, path)
+
+    def _format_size(size: int) -> str:
+        if size < 1024:
+            return f"{size} B"
+        elif size < 1024 ** 2:
+            return f"{size / 1024:.1f} KB"
+        else:
+            return f"{size / 1024 ** 2:.1f} MB"
+
+    def _open_edit_dialog(path: str):
+        page.run_task(_do_open_edit, path)
+
+    async def _do_open_edit(path: str):
+        try:
+            data = await asyncio.to_thread(
+                github_api.get_file_content, state.token, repo["full_name"], path)
+        except Exception as e:
+            dialogs.show_error(page, "Gagal Membaca File", str(e))
+            return
+
+        lines = data["content"].count("\n") + 1
+
+        editor_bg = "#1E1E1E"
+        editor_fg = "#D4D4D4"
+        line_bg  = "#252526"
+
+        undo_stack = [data["content"]]
+        redo_stack = []
+        undo_btn = ft.IconButton(
+            icon=ft.icons.UNDO, icon_size=16, icon_color="#858585",
+            tooltip="Undo (Ctrl+Z)", disabled=True,
+            on_click=lambda _: _undo(),
+        )
+        redo_btn = ft.IconButton(
+            icon=ft.icons.REDO, icon_size=16, icon_color="#858585",
+            tooltip="Redo (Ctrl+Shift+Z)", disabled=True,
+            on_click=lambda _: _redo(),
+        )
+
+        content_input = ft.TextField(
+            value=data["content"],
+            multiline=True,
+            min_lines=8,
+            max_lines=20,
+            bgcolor=editor_bg,
+            border_color="#3C3C3C",
+            focused_border_color=PRIMARY,
+            color=editor_fg,
+            cursor_color="#AEAFAD",
+            border_radius=6,
+            text_style=ft.TextStyle(
+                font_family="Consolas, 'Courier New', monospace",
+                size=13,
+            ),
+            content_padding=ft.padding.symmetric(horizontal=16, vertical=12),
+        )
+
+        line_count_text = ft.Text(f"{lines} lines", size=11, color="#858585")
+        char_count_text = ft.Text(f"{len(data['content'])} chars", size=11, color="#858585")
+
+        _push_timer = None
+
+        def _push_undo_state():
+            nonlocal _push_timer
+            current = content_input.value
+            if current != undo_stack[-1]:
+                undo_stack.append(current)
+                redo_stack.clear()
+                undo_btn.disabled = False
+                redo_btn.disabled = True
+
+        def _undo():
+            if len(undo_stack) > 1:
+                current = content_input.value
+                redo_stack.append(current)
+                prev = undo_stack.pop()
+                content_input.value = undo_stack[-1]
+                undo_btn.disabled = len(undo_stack) <= 1
+                redo_btn.disabled = False
+                _update_stats(None)
+                page.update()
+
+        def _redo():
+            if redo_stack:
+                current = content_input.value
+                undo_stack.append(current)
+                nxt = redo_stack.pop()
+                content_input.value = nxt
+                redo_btn.disabled = not redo_stack
+                undo_btn.disabled = False
+                _update_stats(None)
+                page.update()
+
+        def _update_stats(e):
+            current = content_input.value
+            lc = current.count("\n") + 1
+            line_count_text.value = f"{lc} lines"
+            char_count_text.value = f"{len(current)} chars"
+            nonlocal _push_timer
+            if _push_timer:
+                _push_timer.cancel()
+            _push_timer = asyncio.create_task(_push_delayed())
+
+        async def _push_delayed():
+            await asyncio.sleep(0.3)
+            _push_undo_state()
+            page.update()
+
+        content_input.on_change = _update_stats
+
+        async def _save_edit(_):
+            new_content = content_input.value
+            dialog.open = False
+            page.update()
+            try:
+                await asyncio.to_thread(
+                    github_api.update_file,
+                    state.token, repo["full_name"], path,
+                    new_content, f"Update {path}", data["sha"],
+                    default_branch,
+                )
+                dialogs.show_success(page, "File Disimpan!",
+                                     f"{path} berhasil diperbarui.")
+                page.run_task(_load_contents, current_path)
+            except Exception as e:
+                dialogs.show_error(page, "Gagal Simpan File", str(e))
+
+        def _cancel(_):
+            dialog.open = False
+            page.update()
+
+        dialog = ft.AlertDialog(
+            modal=False,
+            title_padding=ft.padding.all(0),
+            content_padding=ft.padding.all(0),
+            actions_padding=ft.padding.symmetric(horizontal=16, vertical=12),
+            title=ft.Container(
+                bgcolor="#2D2D2D",
+                padding=ft.padding.symmetric(horizontal=16, vertical=10),
+                content=ft.Row(
+                    [
+                        ft.Icon(ft.icons.CODE, size=16, color="#858585"),
+                        ft.Container(width=8),
+                        ft.Text(data["name"], size=13, color=editor_fg,
+                                weight=ft.FontWeight.BOLD, expand=True),
+                        ft.Container(
+                            bgcolor="#3C3C3C",
+                            border_radius=4,
+                            padding=ft.padding.symmetric(horizontal=6, vertical=2),
+                            content=ft.Text(
+                                _format_size(data["size"]), size=10,
+                                color="#858585",
+                            ),
+                        ),
+                    ],
+                    spacing=0,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
+            ),
+            content=ft.Container(
+                width=720,
+                bgcolor=editor_bg,
+                padding=ft.padding.all(0),
+                content=ft.Column(
+                    [
+                        ft.Container(
+                            bgcolor=line_bg,
+                            padding=ft.padding.symmetric(horizontal=8, vertical=4),
+                            content=ft.Row(
+                                [
+                                    undo_btn,
+                                    redo_btn,
+                                    ft.Container(
+                                        width=1, height=16, bgcolor="#3C3C3C",
+                                        margin=ft.margin.symmetric(horizontal=4),
+                                    ),
+                                    ft.Text(f"/{data['path']}", size=11,
+                                            color="#858585", expand=True),
+                                    ft.TextButton(
+                                        content=ft.Text("Salin Konten", size=11,
+                                                        color=ACCENT),
+                                        style=ft.ButtonStyle(padding=ft.padding.all(0)),
+                                        on_click=lambda _: (
+                                            page.set_clipboard(content_input.value),
+                                            page.update(),
+                                        ),
+                                    ),
+                                ],
+                                spacing=4,
+                                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                            ),
+                        ),
+                        ft.Divider(height=1, color="#3C3C3C"),
+                        ft.Container(
+                            content=content_input,
+                            height=360,
+                        ),
+                        ft.Divider(height=1, color="#3C3C3C"),
+                        ft.Container(
+                            bgcolor=line_bg,
+                            padding=ft.padding.symmetric(horizontal=16, vertical=5),
+                            content=ft.Row(
+                                [line_count_text, ft.Text("|", size=11, color="#3C3C3C"),
+                                 char_count_text],
+                                spacing=6,
+                            ),
+                        ),
+                    ],
+                    spacing=0,
+                    tight=True,
+                ),
+            ),
+            actions=[
+                ft.TextButton(
+                    "Batal",
+                    on_click=_cancel,
+                    style=ft.ButtonStyle(
+                        color="#858585",
+                        shape=ft.RoundedRectangleBorder(radius=6),
+                        side=ft.BorderSide(1, "#3C3C3C"),
+                        padding=ft.padding.symmetric(horizontal=16, vertical=8),
+                    ),
+                ),
+                ft.ElevatedButton(
+                    "Simpan",
+                    on_click=_save_edit,
+                    bgcolor=PRIMARY,
+                    color="#FFFFFF",
+                    style=ft.ButtonStyle(
+                        shape=ft.RoundedRectangleBorder(radius=6),
+                        padding=ft.padding.symmetric(horizontal=20, vertical=8),
+                    ),
+                ),
+            ],
+            bgcolor="#2D2D2D",
+            shape=ft.RoundedRectangleBorder(radius=8),
+        )
+        page.overlay.append(dialog)
+        dialog.open = True
+        page.update()
+
+    def _confirm_delete(path: str, is_dir: bool):
+        if is_dir:
+            dialogs.show_confirm(
+                page,
+                f"Hapus Folder '{path}'?",
+                "Folder akan dihapus beserta semua isinya. "
+                "Tindakan ini tidak dapat dibatalkan.",
+                on_confirm=lambda: page.run_task(_do_delete, path, is_dir),
+            )
+        else:
+            dialogs.show_confirm(
+                page,
+                f"Hapus File '{path}'?",
+                "File akan dihapus permanen dari repository.",
+                on_confirm=lambda: page.run_task(_do_delete, path, is_dir),
+            )
+
+    async def _do_delete(path: str, is_dir: bool):
+        try:
+            if is_dir:
+                _delete_dir(path)
+            else:
+                data = await asyncio.to_thread(
+                    github_api.get_file_content, state.token,
+                    repo["full_name"], path)
+                await asyncio.to_thread(
+                    github_api.delete_file,
+                    state.token, repo["full_name"], path,
+                    f"Hapus {path}", data["sha"], default_branch)
+            dialogs.show_success(page, "Berhasil Dihapus!",
+                                 f"{path} berhasil dihapus.")
+            page.run_task(_load_contents, current_path)
+        except Exception as e:
+            dialogs.show_error(page, "Gagal Menghapus", str(e))
+
+    async def _delete_dir(path: str):
+        try:
+            items = await asyncio.to_thread(
+                github_api.get_contents, state.token, repo["full_name"], path)
+            for item in items:
+                p = item["path"]
+                if item["type"] == "dir":
+                    await _delete_dir(p)
+                else:
+                    data = await asyncio.to_thread(
+                        github_api.get_file_content, state.token,
+                        repo["full_name"], p)
+                    await asyncio.to_thread(
+                        github_api.delete_file,
+                        state.token, repo["full_name"], p,
+                        f"Hapus {p}", data["sha"], default_branch)
+        except Exception as e:
+            raise Exception(f"Gagal menghapus folder: {e}")
+
+    path_text = ft.Text("/", size=13, color=ACCENT, weight=ft.FontWeight.BOLD)
+
+    file_manager_section.content = ft.Column(
+        [
+            ft.Row(
+                [
+                    ft.Text("File Manager", size=16, color=TEXT_MAIN,
+                            weight=ft.FontWeight.BOLD, expand=True),
+                    ft.IconButton(
+                        icon=ft.icons.REFRESH,
+                        icon_size=18,
+                        icon_color=TEXT_MUTED,
+                        tooltip="Refresh",
+                        on_click=lambda _: _navigate_to(current_path),
+                    ),
+                ],
+                spacing=8,
+            ),
+            ft.Container(height=8),
+            ft.Container(
+                bgcolor=BG_INPUT,
+                border=ft.border.all(1, BORDER),
+                border_radius=6,
+                padding=ft.padding.symmetric(horizontal=12, vertical=8),
+                content=ft.Row(
+                    [
+                        ft.Icon(ft.icons.FOLDER_OPEN, size=16, color=ACCENT),
+                        path_text,
+                    ],
+                    spacing=6,
+                ),
+                ink=True,
+                on_click=lambda _: _navigate_to(""),
+            ),
+            ft.Container(height=4),
+            ft.Container(
+                bgcolor=BG_INPUT,
+                border=ft.border.all(1, BORDER),
+                border_radius=8,
+                padding=ft.padding.all(6),
+                content=file_list,
+                height=300,
+                # scroll
+            ),
+        ],
+        spacing=4,
+    )
 
     def do_logout():
         from core.auth import delete_token
@@ -370,6 +800,8 @@ def edit_repo_page(page: ft.Page, state: AppState,
                 ],
                 spacing=12,
             ),
+
+            file_manager_section,
         ],
         spacing=0,
     )

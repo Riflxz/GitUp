@@ -31,3 +31,13 @@ Prototype awal dengan berbagai bug threading dan fitur belum lengkap.
 - **Perbaikan:** `run.sh` error `$PYTHON` undefined saat venv sudah ada.
 - **Penambahan:** `fixed.md` changelog.
 - **Penambahan:** Demo GIF, logo baru (in-app + window icon).
+
+## v1.1.1 — File Manager
+- **Penambahan:** File Manager di halaman Settings — browse, edit, dan hapus file/folder repository.
+- **Penambahan:** API `get_contents`, `get_file_content`, `update_file`, `delete_file`.
+
+## v1.2.0 — Editor Improvements
+- **Perbaikan:** Edit dialog tembus layar — batasi tinggi editor (8–20 lines, max 360px).
+- **Perbaikan:** Tombol Batal/Simpan nyatu dengan konten — padding + separator.
+- **Penambahan:** Undo/Redo di editor file (stack per perubahan, debounce 0.3s).
+- **Penambahan:** Tampilan editor ala VS Code (monospace, dark bg `#1E1E1E`, status bar).

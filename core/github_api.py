@@ -340,6 +340,71 @@ def delete_release(token: str, full_name: str, tag_name: str) -> bool:
         raise Exception(f"Gagal menghapus release: {e}")
 
 
+# ── File Manager ─────────────────────────────────────────────
+
+def get_contents(token: str, full_name: str, path: str = "") -> list[dict]:
+    try:
+        g = _client(token)
+        repo = g.get_repo(full_name)
+        contents = repo.get_contents(path)
+        if not isinstance(contents, list):
+            contents = [contents]
+        return [
+            {
+                "name": c.name,
+                "path": c.path,
+                "type": "dir" if c.type == "dir" else "file",
+                "size": c.size,
+                "sha":  c.sha,
+                "download_url": c.download_url if c.type == "file" else "",
+            }
+            for c in contents
+        ]
+    except Exception as e:
+        raise Exception(f"Gagal memuat konten: {e}")
+
+
+def get_file_content(token: str, full_name: str, path: str) -> dict:
+    try:
+        g = _client(token)
+        repo = g.get_repo(full_name)
+        c = repo.get_contents(path)
+        return {
+            "name": c.name,
+            "path": c.path,
+            "sha":  c.sha,
+            "size": c.size,
+            "content": c.decoded_content.decode("utf-8", errors="replace"),
+        }
+    except Exception as e:
+        raise Exception(f"Gagal membaca file: {e}")
+
+
+def update_file(token: str, full_name: str, path: str,
+                content: str, message: str, sha: str,
+                branch: str = "") -> bool:
+    try:
+        g = _client(token)
+        repo = g.get_repo(full_name)
+        kwargs = {"branch": branch} if branch else {}
+        repo.update_file(path, message, content, sha, **kwargs)
+        return True
+    except Exception as e:
+        raise Exception(f"Gagal memperbarui file: {e}")
+
+
+def delete_file(token: str, full_name: str, path: str,
+                message: str, sha: str, branch: str = "") -> bool:
+    try:
+        g = _client(token)
+        repo = g.get_repo(full_name)
+        kwargs = {"branch": branch} if branch else {}
+        repo.delete_file(path, message, sha, **kwargs)
+        return True
+    except Exception as e:
+        raise Exception(f"Gagal menghapus file: {e}")
+
+
 def get_default_branch_sha(token: str, full_name: str) -> str:
     try:
         g = _client(token)

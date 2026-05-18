@@ -11,15 +11,10 @@ A cross-platform desktop GUI for managing GitHub repositories — create, upload
   <img src="https://img.shields.io/badge/flet-0.24-green" alt="Flet">
   <img src="https://img.shields.io/badge/license-MIT-orange" alt="License">
   <img src="https://img.shields.io/badge/platform-linux-lightgrey" alt="Linux">
+  <img src="https://img.shields.io/badge/version-1.2.0-brightgreen" alt="Version">
 </div>
 
 ---
-
-## Demo
-
-<div align="center">
-  <img src="gif.gif" alt="GitForge Demo" width="720"/>
-</div>
 
 ## Features
 
@@ -54,7 +49,7 @@ A cross-platform desktop GUI for managing GitHub repositories — create, upload
 ### Setup & Run
 
 ```bash
-git clone https://github.com/Riflxz/GitForge
+git clone <repository-url>
 cd GitForge
 bash run.sh setup    # Install dependencies (cukup sekali)
 bash run.sh start    # Jalankan aplikasi
@@ -136,6 +131,12 @@ GitForge/
     └── sidebar.py           # Navigation sidebar
 ```
 
+## Demo
+
+<div align="center">
+  <img src="gif.gif" alt="GitForge Demo" width="720"/>
+</div>
+
 ## Technology Stack
 
 | Technology | Version |
@@ -149,3 +150,7 @@ GitForge/
 ## License
 
 This project is open source and distributed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+
+## Changelog
+
+Lihat [fixed.md](fixed.md) untuk riwayat perubahan dari v1.0.0 hingga v1.2.0.
