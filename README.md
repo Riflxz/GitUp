@@ -11,16 +11,10 @@ A cross-platform desktop GUI for managing GitHub repositories — create, upload
   <img src="https://img.shields.io/badge/flet-0.24-green" alt="Flet">
   <img src="https://img.shields.io/badge/license-MIT-orange" alt="License">
   <img src="https://img.shields.io/badge/platform-linux-lightgrey" alt="Linux">
-  <img src="https://img.shields.io/badge/version-1.2.1-brightgreen" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.2.0-brightgreen" alt="Version">
 </div>
 
 ---
-
-## Demo
-
-<div align="center">
-  <img src="gif.gif" alt="GitForge Demo" width="720"/>
-</div>
 
 ## Features
 
@@ -113,8 +107,7 @@ GitForge/
 ├── run.sh                   # Script utama (setup/start/check/help)
 ├── logo.png                 # Logo aplikasi
 ├── icon.png                 # Icon window
-├── gif.gif                  # Demo GIF
-├── fixed.md                 # Changelog
+├── update_logs.md           # Changelog
 ├── core/
 │   ├── auth.py              # Token management (keyring)
 │   ├── file_dialog.py       # File picker (tkinter fallback)
@@ -155,7 +148,3 @@ GitForge/
 ## License
 
 This project is open source and distributed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
-
-## Changelog
-
-Lihat [fixed.md](fixed.md) untuk riwayat perubahan dari v1.0.0 hingga v1.2.0.

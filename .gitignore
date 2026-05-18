@@ -5,6 +5,7 @@ __pycache__/
 *.session
 *.token
 .env
-fixed.md
-gif.gif
+
+# Local config files — not pushed to GitHub
 README.md
+gif.gif
