@@ -166,6 +166,9 @@ def edit_repo_page(page: ft.Page, state: AppState,
 
     page.run_task(_load_detail)
 
+    async def _navigate_dashboard():
+        navigate(PAGE_DASHBOARD)
+
     async def do_save(_):
         new_name = name_input.value.strip()
         if not new_name:
@@ -201,7 +204,8 @@ def edit_repo_page(page: ft.Page, state: AppState,
                 page,
                 "Pengaturan Disimpan!",
                 "Repository berhasil diperbarui.",
-                on_close=lambda: navigate(PAGE_DASHBOARD),
+                on_close=lambda: page.run_task(
+                    _navigate_dashboard),
             )
         except Exception as e:
             save_btn.disabled = False
@@ -354,23 +358,29 @@ def edit_repo_page(page: ft.Page, state: AppState,
         line_count_text = ft.Text(f"{lines} lines", size=11, color="#858585")
         char_count_text = ft.Text(f"{len(data['content'])} chars", size=11, color="#858585")
 
-        _push_timer = None
+        _push_version = 0
 
-        def _push_undo_state():
-            nonlocal _push_timer
+        def _update_stats(e):
             current = content_input.value
-            if current != undo_stack[-1]:
-                undo_stack.append(current)
-                redo_stack.clear()
-                undo_btn.disabled = False
-                redo_btn.disabled = True
+            lc = current.count("\n") + 1
+            line_count_text.value = f"{lc} lines"
+            char_count_text.value = f"{len(current)} chars"
+            nonlocal _push_version
+            _push_version += 1
+            page.run_task(_push_delayed, _push_version)
+
+        async def _push_delayed(version: int):
+            await asyncio.sleep(0.3)
+            if version == _push_version:
+                _push_undo_state()
+                page.update()
 
         def _undo():
-            if len(undo_stack) > 1:
+            if undo_stack:
                 current = content_input.value
                 redo_stack.append(current)
                 prev = undo_stack.pop()
-                content_input.value = undo_stack[-1]
+                content_input.value = prev
                 undo_btn.disabled = len(undo_stack) <= 1
                 redo_btn.disabled = False
                 _update_stats(None)
@@ -387,27 +397,32 @@ def edit_repo_page(page: ft.Page, state: AppState,
                 _update_stats(None)
                 page.update()
 
-        def _update_stats(e):
+        def _push_undo_state():
             current = content_input.value
-            lc = current.count("\n") + 1
-            line_count_text.value = f"{lc} lines"
-            char_count_text.value = f"{len(current)} chars"
-            nonlocal _push_timer
-            if _push_timer:
-                _push_timer.cancel()
-            _push_timer = asyncio.create_task(_push_delayed())
-
-        async def _push_delayed():
-            await asyncio.sleep(0.3)
-            _push_undo_state()
-            page.update()
+            if not undo_stack or current != undo_stack[-1]:
+                undo_stack.append(current)
+                redo_stack.clear()
+                undo_btn.disabled = False
+                redo_btn.disabled = True
 
         content_input.on_change = _update_stats
 
-        async def _save_edit(_):
-            new_content = content_input.value
-            dialog.open = False
+        save_btn = ft.ElevatedButton(
+            "Simpan",
+            on_click=lambda _: page.run_task(_save_edit, save_btn),
+            bgcolor=PRIMARY,
+            color="#FFFFFF",
+            style=ft.ButtonStyle(
+                shape=ft.RoundedRectangleBorder(radius=6),
+                padding=ft.padding.symmetric(horizontal=20, vertical=8),
+            ),
+        )
+
+        async def _save_edit(btn):
+            btn.disabled = True
+            btn.text = "Menyimpan..."
             page.update()
+            new_content = content_input.value
             try:
                 await asyncio.to_thread(
                     github_api.update_file,
@@ -415,10 +430,16 @@ def edit_repo_page(page: ft.Page, state: AppState,
                     new_content, f"Update {path}", data["sha"],
                     default_branch,
                 )
+                dialog.open = False
+                page.update()
                 dialogs.show_success(page, "File Disimpan!",
                                      f"{path} berhasil diperbarui.")
                 page.run_task(_load_contents, current_path)
             except Exception as e:
+                btn.disabled = False
+                btn.text = "Simpan"
+                dialog.open = False
+                page.update()
                 dialogs.show_error(page, "Gagal Simpan File", str(e))
 
         def _cancel(_):
@@ -517,16 +538,7 @@ def edit_repo_page(page: ft.Page, state: AppState,
                         padding=ft.padding.symmetric(horizontal=16, vertical=8),
                     ),
                 ),
-                ft.ElevatedButton(
-                    "Simpan",
-                    on_click=_save_edit,
-                    bgcolor=PRIMARY,
-                    color="#FFFFFF",
-                    style=ft.ButtonStyle(
-                        shape=ft.RoundedRectangleBorder(radius=6),
-                        padding=ft.padding.symmetric(horizontal=20, vertical=8),
-                    ),
-                ),
+                save_btn,
             ],
             bgcolor="#2D2D2D",
             shape=ft.RoundedRectangleBorder(radius=8),

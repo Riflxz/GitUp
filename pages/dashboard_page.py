@@ -9,6 +9,8 @@ from config import (
 )
 from core import github_api
 from core.state import AppState
+from core.update_checker import check_update, is_git_repo, apply_update, install_deps
+from config import APP_VERSION
 from components.sidebar import Sidebar
 from components.repo_card import RepoCard
 from components import dialogs
@@ -146,6 +148,7 @@ def dashboard_page(page: ft.Page, state: AppState, navigate: callable) -> ft.Row
         try:
             all_repos = await asyncio.to_thread(
                 github_api.get_repos, state.token)
+            page.run_task(_check_update)
         except Exception as e:
             all_repos = []
             dialogs.show_error(page, "Gagal Memuat", str(e))
@@ -172,6 +175,100 @@ def dashboard_page(page: ft.Page, state: AppState, navigate: callable) -> ft.Row
                 page.snack_bar.open = True
                 state.pending_success = None
                 page.update()
+
+    async def _check_update():
+        try:
+            info = await asyncio.to_thread(check_update, APP_VERSION, state.token)
+            if not info.get("available"):
+                return
+        except Exception:
+            return
+
+        def _do_update():
+            update_dialog.open = False
+            page.update()
+            page.run_task(_apply_update)
+
+        def _later():
+            update_dialog.open = False
+            page.update()
+
+        update_dialog = ft.AlertDialog(
+            modal=False,
+            title=ft.Row(
+                [
+                    ft.Icon(ft.icons.SYSTEM_UPDATE, color=ACCENT, size=20),
+                    ft.Text("Update Tersedia!", color=TEXT_MAIN,
+                            weight=ft.FontWeight.BOLD),
+                ],
+                spacing=8,
+            ),
+            content=ft.Column(
+                [
+                    ft.Text(
+                        f"Versi baru {info['latest_tag']} tersedia "
+                        f"(saat ini: v{APP_VERSION}).",
+                        color=TEXT_MAIN, size=13,
+                    ),
+                    ft.Text(
+                        "Ingin mengupdate sekarang?",
+                        color=TEXT_MUTED, size=12,
+                    ),
+                ],
+                spacing=6,
+                tight=True,
+            ),
+            actions=[
+                ft.TextButton("Nanti Saja", on_click=lambda _: _later(),
+                              style=ft.ButtonStyle(color=TEXT_MUTED)),
+                ft.ElevatedButton("Update Sekarang", on_click=lambda _: _do_update(),
+                                  bgcolor=ACCENT, color="#FFFFFF"),
+            ],
+            bgcolor=BG_SURFACE,
+            shape=ft.RoundedRectangleBorder(radius=8),
+        )
+        page.overlay.append(update_dialog)
+        update_dialog.open = True
+        page.update()
+
+    async def _apply_update():
+        if not is_git_repo():
+            dialogs.show_error(page, "Gagal Update",
+                               "Direktori bukan git repository.")
+            return
+
+        prog = dialogs.ProgressDialog(page, "Mengupdate GitForge...")
+        prog.show()
+        prog.log("Menarik kode terbaru...")
+
+        ok, msg = await asyncio.to_thread(apply_update)
+        if not ok:
+            prog.close()
+            dialogs.show_error(page, "Gagal Update", msg)
+            return
+
+        prog.log("Menginstall dependensi...")
+        ok2, msg2 = await asyncio.to_thread(install_deps)
+        prog.close()
+
+        if not ok2:
+            dialogs.show_error(page, "Gagal Install Dependensi", msg2)
+            return
+
+        dialogs.show_confirm(
+            page,
+            "Update Berhasil!",
+            "GitForge telah diperbarui. Restart aplikasi sekarang?",
+            on_confirm=lambda: _restart_app(),
+        )
+
+    def _restart_app():
+        import os
+        import sys
+        python = sys.executable
+        os.execl(python, python, "-c",
+                 "import subprocess, sys; subprocess.Popen(sys.argv[1:]); sys.exit(0)",
+                 *sys.argv)
 
     def on_search(e):
         nonlocal search_val
