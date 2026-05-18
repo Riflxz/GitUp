@@ -141,23 +141,6 @@ github-uploader/
     ├── repo_card.py         # Repository card component
     └── sidebar.py           # Navigation sidebar
 ```
-
-## Theme
-
-The application uses a consistent **GitHub Dark** theme throughout all pages.
-
-| Element | Color |
-|---------|-------|
-| Background | `#0D1117` |
-| Surface / Card | `#161B22` |
-| Input | `#21262D` |
-| Border | `#30363D` |
-| Primary (green) | `#238636` |
-| Danger (red) | `#DA3633` |
-| Main text | `#E6EDF3` |
-| Muted text | `#8B949E` |
-| Accent (blue) | `#58A6FF` |
-
 ## Technology Stack
 
 | Technology | Version |
