@@ -49,7 +49,7 @@ A cross-platform desktop GUI for managing GitHub repositories — create, upload
 ### Setup & Run
 
 ```bash
-git clone <repository-url>
+git clone [<repository-url>](https://github.com/Riflxz/GitForge)
 cd GitForge
 bash run.sh setup    # Install dependencies (cukup sekali)
 bash run.sh start    # Jalankan aplikasi
