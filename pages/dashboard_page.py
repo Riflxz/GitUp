@@ -258,17 +258,12 @@ def dashboard_page(page: ft.Page, state: AppState, navigate: callable) -> ft.Row
         dialogs.show_confirm(
             page,
             "Update Berhasil!",
-            "GitForge telah diperbarui. Restart aplikasi sekarang?",
-            on_confirm=lambda: _restart_app(),
+            "GitForge telah diperbarui ke versi terbaru.\nSilakan tutup dan buka kembali aplikasi.",
+            on_confirm=lambda: _close_dialog(),
         )
 
-    def _restart_app():
-        import os, subprocess, sys
-        subprocess.Popen(
-            [sys.executable, "-m", "flet", "run", "main.py"],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-        )
-        os._exit(0)
+    def _close_dialog():
+        pass
 
     def on_search(e):
         nonlocal search_val
