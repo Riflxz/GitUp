@@ -16,6 +16,12 @@ A cross-platform desktop GUI for managing GitHub repositories — create, upload
 
 ---
 
+## Demo
+
+<div align="center">
+  <img src="gif.gif" alt="GitForge Demo" width="720"/>
+</div>
+
 ## Features
 
 | Feature | Description |
@@ -130,12 +136,6 @@ GitForge/
     ├── repo_card.py         # Repository card component
     └── sidebar.py           # Navigation sidebar
 ```
-
-## Demo
-
-<div align="center">
-  <img src="gif.gif" alt="GitForge Demo" width="720"/>
-</div>
 
 ## Technology Stack
 
