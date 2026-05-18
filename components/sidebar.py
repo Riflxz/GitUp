@@ -119,11 +119,24 @@ class Sidebar(ft.UserControl):
                         color=TEXT_MUTED,
                         text_align=ft.TextAlign.CENTER,
                     ),
-                    ft.TextButton(
-                        content=ft.Text("@ZeroXD909", size=9, color=ACCENT,
-                                        text_align=ft.TextAlign.CENTER),
-                        url="https://t.me/zeroxd909",
-                        style=ft.ButtonStyle(padding=ft.padding.all(0)),
+                    ft.Row(
+                        [
+                            ft.TextButton(
+                                content=ft.Text("@Df719s", size=9, color=ACCENT,
+                                                text_align=ft.TextAlign.CENTER),
+                                url="https://t.me/Df719s",
+                                style=ft.ButtonStyle(padding=ft.padding.all(0)),
+                            ),
+                            ft.Text("|", size=9, color=TEXT_MUTED),
+                            ft.TextButton(
+                                content=ft.Text("Rifl xz", size=9, color=ACCENT,
+                                                text_align=ft.TextAlign.CENTER),
+                                url="https://youtube.com/@riflxzsec",
+                                style=ft.ButtonStyle(padding=ft.padding.all(0)),
+                            ),
+                        ],
+                        spacing=4,
+                        alignment=ft.MainAxisAlignment.CENTER,
                     ),
                 ],
                 expand=True,

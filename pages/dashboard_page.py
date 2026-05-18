@@ -187,7 +187,7 @@ def dashboard_page(page: ft.Page, state: AppState, navigate: callable) -> ft.Row
         def _do_update():
             update_dialog.open = False
             page.update()
-            page.run_task(_apply_update)
+            page.run_task(_apply_update, info.get("latest_tag", ""))
 
         def _later():
             update_dialog.open = False
@@ -231,17 +231,17 @@ def dashboard_page(page: ft.Page, state: AppState, navigate: callable) -> ft.Row
         update_dialog.open = True
         page.update()
 
-    async def _apply_update():
-        if not is_git_repo():
-            dialogs.show_error(page, "Gagal Update",
-                               "Direktori bukan git repository.")
-            return
-
+    async def _apply_update(latest_tag: str = ""):
         prog = dialogs.ProgressDialog(page, "Mengupdate GitForge...")
         prog.show()
-        prog.log("Menarik kode terbaru...")
 
-        ok, msg = await asyncio.to_thread(apply_update)
+        if is_git_repo():
+            prog.log("Menarik kode terbaru...")
+            ok, msg = await asyncio.to_thread(apply_update)
+        else:
+            prog.log("Mendownload versi terbaru...")
+            ok, msg = await asyncio.to_thread(apply_update, latest_tag)
+
         if not ok:
             prog.close()
             dialogs.show_error(page, "Gagal Update", msg)

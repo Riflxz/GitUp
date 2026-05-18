@@ -340,27 +340,6 @@ def delete_release(token: str, full_name: str, tag_name: str) -> bool:
         raise Exception(f"Gagal menghapus release: {e}")
 
 
-def update_release(token: str, full_name: str, tag_name: str, title: str, body: str, draft: bool = False, prerelease: bool = False) -> dict:
-    try:
-        g = _client(token)
-        repo = g.get_repo(full_name)
-        for rel in repo.get_releases():
-            if rel.tag_name == tag_name:
-                rel.update_release(title, body, draft=draft, prerelease=prerelease)
-                return {
-                    "tag_name":     rel.tag_name,
-                    "title":        rel.title or "",
-                    "body":         rel.body or "",
-                    "published_at": rel.published_at.strftime("%d %b %Y") if rel.published_at else "-",
-                    "html_url":     rel.html_url,
-                    "draft":        rel.draft,
-                    "prerelease":   rel.prerelease,
-                }
-        raise Exception(f"Release dengan tag '{tag_name}' tidak ditemukan")
-    except Exception as e:
-        raise Exception(f"Gagal memperbarui release: {e}")
-
-
 # ── File Manager ─────────────────────────────────────────────
 
 def get_contents(token: str, full_name: str, path: str = "") -> list[dict]:

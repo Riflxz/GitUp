@@ -338,14 +338,6 @@ def info_page(page: ft.Page, state: AppState,
                                                     weight=ft.FontWeight.BOLD, expand=True),
                                             ft.Text(rl["published_at"], size=11, color=TEXT_MUTED),
                                             ft.IconButton(
-                                                icon=ft.icons.EDIT,
-                                                icon_size=16,
-                                                icon_color=ACCENT,
-                                                tooltip="Edit release",
-                                                on_click=lambda _, tag=rl["tag_name"], t=rl["title"], b=rl["body"], d=rl["draft"], p=rl["prerelease"]:
-                                                    _open_edit_release_dialog(tag, t, b, d, p),
-                                            ),
-                                            ft.IconButton(
                                                 icon=ft.icons.DELETE_OUTLINE,
                                                 icon_size=16,
                                                 icon_color=DANGER,
@@ -547,107 +539,6 @@ def info_page(page: ft.Page, state: AppState,
                 ft.TextButton("Batal", on_click=_cancel,
                               style=ft.ButtonStyle(color=TEXT_MUTED)),
                 ft.ElevatedButton("Buat Release", on_click=lambda _: page.run_task(_do_create),
-                                  bgcolor=PRIMARY, color="#FFFFFF"),
-            ],
-            bgcolor=BG_SURFACE,
-            shape=ft.RoundedRectangleBorder(radius=8),
-        )
-        page.overlay.append(dialog)
-        dialog.open = True
-        page.update()
-
-    def _open_edit_release_dialog(tag_name: str, cur_title: str, cur_body: str, cur_draft: bool, cur_prerelease: bool):
-        title_input = ft.TextField(
-            label="Judul Release",
-            value=cur_title,
-            bgcolor=BG_INPUT,
-            border_color=BORDER,
-            focused_border_color=PRIMARY,
-            color=TEXT_MAIN,
-            label_style=ft.TextStyle(color=TEXT_MUTED),
-            cursor_color=TEXT_MAIN,
-            border_radius=8,
-            content_padding=ft.padding.symmetric(horizontal=14, vertical=10),
-        )
-        body_input = ft.TextField(
-            label="Deskripsi",
-            value=cur_body,
-            multiline=True,
-            min_lines=3,
-            max_lines=8,
-            bgcolor=BG_INPUT,
-            border_color=BORDER,
-            focused_border_color=PRIMARY,
-            color=TEXT_MAIN,
-            label_style=ft.TextStyle(color=TEXT_MUTED),
-            cursor_color=TEXT_MAIN,
-            border_radius=8,
-            content_padding=ft.padding.symmetric(horizontal=14, vertical=10),
-        )
-        draft_check = ft.Checkbox(
-            label="Draft (tidak dipublikasikan)",
-            value=cur_draft,
-            label_style=ft.TextStyle(color=TEXT_MAIN),
-            check_color=PRIMARY, active_color=PRIMARY,
-        )
-        prerelease_check = ft.Checkbox(
-            label="Prerelease",
-            value=cur_prerelease,
-            label_style=ft.TextStyle(color=TEXT_MAIN),
-            check_color=PRIMARY, active_color=PRIMARY,
-        )
-
-        async def _do_save():
-            title = title_input.value.strip()
-            body  = body_input.value.strip()
-            draft = draft_check.value
-            pre   = prerelease_check.value
-
-            if not title:
-                return
-
-            dialog.open = False
-            page.update()
-
-            try:
-                await asyncio.to_thread(
-                    github_api.update_release,
-                    state.token, repo["full_name"], tag_name, title, body, draft, pre)
-                dialogs.show_success(page, "Release Diperbarui!",
-                                     f"Release '{tag_name}' berhasil diperbarui.")
-                page.run_task(_load_releases)
-            except Exception as e:
-                dialogs.show_error(page, "Gagal Memperbarui Release", str(e))
-
-        def _cancel(_):
-            dialog.open = False
-            page.update()
-
-        dialog = ft.AlertDialog(
-            modal=False,
-            title=ft.Text(f"Edit Release: {tag_name}", color=TEXT_MAIN,
-                          weight=ft.FontWeight.BOLD),
-            content=ft.Container(
-                width=480,
-                content=ft.Column(
-                    [
-                        ft.Text("Perbarui detail release di bawah.",
-                                color=TEXT_MUTED, size=12),
-                        ft.Container(height=4),
-                        title_input,
-                        body_input,
-                        draft_check,
-                        prerelease_check,
-                    ],
-                    spacing=10,
-                    tight=True,
-                ),
-            ),
-            actions=[
-                ft.TextButton("Batal", on_click=_cancel,
-                              style=ft.ButtonStyle(color=TEXT_MUTED)),
-                ft.ElevatedButton("Simpan Perubahan",
-                                  on_click=lambda _: page.run_task(_do_save),
                                   bgcolor=PRIMARY, color="#FFFFFF"),
             ],
             bgcolor=BG_SURFACE,

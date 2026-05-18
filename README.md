@@ -11,7 +11,7 @@ A cross-platform desktop GUI for managing GitHub repositories — create, upload
   <img src="https://img.shields.io/badge/flet-0.24-green" alt="Flet">
   <img src="https://img.shields.io/badge/license-MIT-orange" alt="License">
   <img src="https://img.shields.io/badge/platform-linux-lightgrey" alt="Linux">
-  <img src="https://img.shields.io/badge/version-1.2.0-brightgreen" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.2.1-brightgreen" alt="Version">
 </div>
 
 ---
@@ -146,6 +146,11 @@ GitForge/
 | [PyGithub](https://pygithub.readthedocs.io/) | 2.1 |
 | [GitPython](https://gitpython.readthedocs.io/) | 3.1 |
 | [keyring](https://github.com/jaraco/keyring) | 24.3 |
+
+## Connect With Me
+
+[![Telegram](https://img.shields.io/badge/Telegram-@Df719s-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/Df719s)
+[![YouTube](https://img.shields.io/badge/YouTube-@riflxzsec-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtube.com/@riflxzsec)
 
 ## License
 
