@@ -16,6 +16,12 @@ A cross-platform desktop GUI for managing GitHub repositories — create, upload
 
 ---
 
+## Demo
+
+<div align="center">
+  <img src="gif.gif" alt="GitForge Demo" width="720"/>
+</div>
+
 ## Features
 
 | Feature | Description |
