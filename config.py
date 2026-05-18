@@ -1,6 +1,6 @@
 # config.py — Konstanta global aplikasi
 
-APP_NAME    = "GitHub Uploader"
+APP_NAME    = "GitForge"
 APP_VERSION = "1.0.4"
 WIN_WIDTH   = 1100
 WIN_HEIGHT  = 700

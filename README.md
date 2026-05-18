@@ -1,10 +1,10 @@
-# GitHub Uploader
+# GitForge
 
 <div align="center">
-  <img src="logo.png" alt="GitHub Uploader" width="128"/>
+  <img src="logo.png" alt="GitForge" width="128"/>
 </div>
 
-A cross-platform desktop GUI application for managing GitHub repositories — create, upload, clone, branch, and configure repositories with an intuitive interface.
+A cross-platform desktop GUI for managing GitHub repositories — create, upload, clone, branch, and manage tags, releases, and topics.
 
 <div align="center">
   <img src="https://img.shields.io/badge/python-3.11%2B-blue" alt="Python">
@@ -45,24 +45,13 @@ A cross-platform desktop GUI application for managing GitHub repositories — cr
 
 ## Installation
 
-### Automated Setup
+### Setup & Run
 
 ```bash
-git clone https://github.com/Riflxz/GitUp.git
-cd github-uploader
-bash setup.sh
-```
-
-### Manual Setup
-
-```bash
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate
-
-# Install dependencies
-pip install --upgrade pip
-pip install -r requirements.txt
+git clone <repository-url>
+cd GitForge
+bash run.sh setup    # Install dependencies (cukup sekali)
+bash run.sh start    # Jalankan aplikasi
 ```
 
 ### Distribution-Specific Prerequisites
@@ -90,14 +79,10 @@ sudo zypper install python3 python3-pip git python3-tk
 ## Running the Application
 
 ```bash
-bash start.sh
-```
-
-Or manually:
-
-```bash
-source venv/bin/activate
-python main.py
+bash run.sh          # Start (auto-setup jika venv belum ada)
+bash run.sh setup    # Setup ulang dependencies
+bash run.sh check    # Cek dependencies sistem
+bash run.sh help     # Bantuan
 ```
 
 ## Obtaining a GitHub Token
@@ -114,12 +99,15 @@ python main.py
 ## Project Structure
 
 ```
-github-uploader/
+GitForge/
 ├── main.py                  # Entry point & routing
 ├── config.py                # Global constants & theme colors
 ├── requirements.txt         # Python dependencies
-├── setup.sh                 # Automated setup script
-├── start.sh                 # Application launcher
+├── run.sh                   # Script utama (setup/start/check/help)
+├── logo.png                 # Logo aplikasi
+├── icon.png                 # Icon window
+├── gif.gif                  # Demo GIF
+├── fixed.md                 # Changelog
 ├── core/
 │   ├── auth.py              # Token management (keyring)
 │   ├── file_dialog.py       # File picker (tkinter fallback)
@@ -141,6 +129,13 @@ github-uploader/
     ├── repo_card.py         # Repository card component
     └── sidebar.py           # Navigation sidebar
 ```
+
+## Demo
+
+<div align="center">
+  <img src="gif.gif" alt="GitForge Demo" width="720"/>
+</div>
+
 ## Technology Stack
 
 | Technology | Version |

@@ -113,7 +113,7 @@ def login_page(page: ft.Page, state: AppState, navigate: callable) -> ft.Contain
                             "   (tombol 'Buka Halaman Token' di bawah)\n\n"
                             "2. Klik 'Generate new token' lalu\n"
                             "   pilih 'Generate new token (classic)'\n\n"
-                            "3. Beri nama token (contoh: github-uploader)\n\n"
+                            "3. Beri nama token (contoh: GitForge)\n\n"
                             "4. Centang scope berikut:\n"
                             "   • repo (akses penuh ke repository)\n"
                             "   • delete_repo (hapus repository)\n\n"
@@ -167,7 +167,7 @@ def login_page(page: ft.Page, state: AppState, navigate: callable) -> ft.Contain
             [
                 ft.Image(src="logo.png", width=80, height=80, fit=ft.ImageFit.CONTAIN),
                 ft.Text(
-                    "GitHub Uploader",
+                    "GitForge",
                     size=26, color=TEXT_MAIN,
                     weight=ft.FontWeight.BOLD,
                 ),

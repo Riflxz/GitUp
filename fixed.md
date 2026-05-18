@@ -31,7 +31,6 @@ Buggy prototype with threading issues and incomplete features.
 - **Login auto-validation** — If token is saved in system keyring, auto-validate on startup without user interaction via `page.run_task(_auto_login)`.
 - **`start.sh` multi-distro support** — Auto-detects Arch, Ubuntu, Fedora, openSUSE; finds Python 3.11+; creates venv; retries pip with `--break-system-packages` on PEP 668 errors.
 - **libmpv symlink** — Auto-creates `libmpv.so.1` symlink from any `libmpv.so.*` found on the system.
-- **`run.sh`** — Simple launcher assuming venv exists.
 - **tkinter check** — Warning if tkinter is missing for file dialogs.
 - **Always `auto_init=True`** — Removed init-readme checkbox; guarantees a main branch exists, avoiding empty-repo edge cases.
 
@@ -59,10 +58,11 @@ Buggy prototype with threading issues and incomplete features.
 ### Fixed
 - **Window icon still showing gear** — `page.window.icon` needs base64-encoded PNG data URI, not a file path. Fixed with `data:image/png;base64,...` format using resized 64×64 icon.
 - **`on_deleted` → `on_delete`** (missed one instance in info page).
+- **Three separate scripts** — `start.sh`, `setup.sh`, `run.sh` merged into single `run.sh` with subcommands (`start`, `setup`, `check`, `help`).
 ### Added
 - **Project logo** — `logo.png` (in-app), `icon.png` (window/taskbar).
 - **`.gitignore`** — Excludes `venv/`, `__pycache__`, `.local-libs`, etc.
 - **Author credit link** — `@ZeroXD909` in sidebar now blue (`ACCENT`) and clickable, opens `https://t.me/zeroxd909`.
 - **`LICENSE`** — Cleaned up, removed cringey disclaimer footer.
 - **`README.md`** — Updated with logo, info page in project structure, cleaned up.
-- **Backup system** — Sanitized backups at `github-uploader-v{version}/` (no venv, no pycache, no personal data).
+- **Backup system** — Sanitized backups at `GitForge-v{version}/` (no venv, no pycache, no personal data).
