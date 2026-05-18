@@ -265,10 +265,7 @@ def dashboard_page(page: ft.Page, state: AppState, navigate: callable) -> ft.Row
     def _restart_app():
         import os
         import sys
-        python = sys.executable
-        os.execl(python, python, "-c",
-                 "import subprocess, sys; subprocess.Popen(sys.argv[1:]); sys.exit(0)",
-                 *sys.argv)
+        os.execl(sys.executable, sys.executable, "main.py")
 
     def on_search(e):
         nonlocal search_val
