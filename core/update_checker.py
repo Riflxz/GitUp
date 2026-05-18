@@ -111,6 +111,10 @@ def _apply_zip_download(tag: str) -> tuple[bool, str]:
                         shutil.copytree(s, dst)
                     else:
                         shutil.copy2(s, dst)
+                # Pastikan run.sh tetap executable
+                run_sh = os.path.join(APP_DIR, "run.sh")
+                if os.path.exists(run_sh):
+                    os.chmod(run_sh, 0o755)
     except Exception as e:
         return False, f"Gagal mengekstrak: {e}"
 

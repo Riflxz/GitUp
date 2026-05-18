@@ -258,12 +258,17 @@ def dashboard_page(page: ft.Page, state: AppState, navigate: callable) -> ft.Row
         dialogs.show_confirm(
             page,
             "Update Berhasil!",
-            "GitForge telah diperbarui ke versi terbaru.\nSilakan tutup dan buka kembali aplikasi.",
-            on_confirm=lambda: _close_dialog(),
+            "GitForge telah diperbarui.\n\n"
+            "Aplikasi akan ditutup sekarang.\n"
+            "Jalankan ulang dengan:\n"
+            "  bash run.sh start\n\n"
+            "Jika error permission:\n"
+            "  chmod +x run.sh && bash run.sh start",
+            on_confirm=lambda: _close_app(),
         )
 
-    def _close_dialog():
-        pass
+    def _close_app():
+        page.window.destroy()
 
     def on_search(e):
         nonlocal search_val
