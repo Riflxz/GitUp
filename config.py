@@ -1,7 +1,7 @@
 # config.py — Konstanta global aplikasi
 
 APP_NAME    = "GitForge"
-APP_VERSION = "1.0.4"
+APP_VERSION = "1.1.0"
 WIN_WIDTH   = 1100
 WIN_HEIGHT  = 700
 

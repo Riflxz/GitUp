@@ -25,3 +25,9 @@ Prototype awal dengan berbagai bug threading dan fitur belum lengkap.
 - **Perbaikan:** `start.sh` + `setup.sh` + `run.sh` digabung jadi satu `run.sh` (start/setup/check/help).
 - **Penambahan:** Logo aplikasi, `.gitignore`, author link `@ZeroXD909`.
 - **Penambahan:** LICENSE & README dibersihkan.
+
+## v1.1.0 — Rename & Script Merge
+- **Perubahan:** Nama project `GitHub Uploader` → `GitForge`.
+- **Perbaikan:** `run.sh` error `$PYTHON` undefined saat venv sudah ada.
+- **Penambahan:** `fixed.md` changelog.
+- **Penambahan:** Demo GIF, logo baru (in-app + window icon).
